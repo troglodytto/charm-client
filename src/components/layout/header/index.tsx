@@ -24,9 +24,11 @@ import {
   RiEmotionLaughLine,
 } from 'react-icons/ri';
 import { MdOutlineNotificationsActive } from 'react-icons/md';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useModal } from 'hooks';
 import { WithChildren } from 'next-env';
+import { authSelector } from 'store/reducers/auth';
 
 const AppHeaderNav = styled.nav`
   background-color: ${props => props.theme.primary};
@@ -129,7 +131,8 @@ const DropdownMenu: FC<WithChildren & ButtonProps & DropdownProps> = ({
 
 const AppHeader: FC = () => {
   const { open } = useModal();
-  const [online, setOnline] = useState(false);
+
+  const auth = useSelector(authSelector);
 
   const onLogin: MouseEventHandler = () => {
     open(<h2>Hi</h2>);
@@ -171,24 +174,19 @@ const AppHeader: FC = () => {
         startAdornment={<SearchIcon size={24} />}
       />
 
-      {true ? (
-        <IconButton color="primary" onClick={onLogin}>
-          <RiUser6Line color="#83e1f0" size={24} />
-        </IconButton>
-      ) : (
+      {auth.isAuthorized ? (
         <DropdownMenu
           endIcon={<FiChevronDown />}
           label={
-            <Avatar sx={{ backgroundColor: '#83e1f0', height: 36, width: 36 }}>
-              V
+            <Avatar
+              sx={{ backgroundColor: '#83e1f0', height: 36, width: 36 }}
+              src={auth.profileImage}>
+              {auth.userName.charAt(0)}
             </Avatar>
           }>
-          <MenuButton
-            fullWidth
-            onClick={() => setOnline(!online)}
-            startIcon={<AiOutlineNotification />}>
+          <MenuButton fullWidth startIcon={<AiOutlineNotification />}>
             Online Status
-            <Switch checked={online} sx={{ marginLeft: 'auto' }} />
+            <Switch checked={auth.onlineStatus} sx={{ marginLeft: 'auto' }} />
           </MenuButton>
           <MenuButton
             fullWidth
@@ -219,6 +217,10 @@ const AppHeader: FC = () => {
             </MenuButton>
           </Link>
         </DropdownMenu>
+      ) : (
+        <IconButton color="primary" onClick={onLogin}>
+          <RiUser6Line color="#83e1f0" size={24} />
+        </IconButton>
       )}
     </AppHeaderNav>
   );

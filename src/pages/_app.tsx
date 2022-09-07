@@ -1,8 +1,11 @@
 import Layout from 'components/layout';
-import GlobalModalContextProvider from 'components/layout/modal';
 import { AppProps } from 'next/app';
 import { MutationCache, QueryClient, QueryClientProvider } from 'react-query';
+import { Provider as StoreProvider } from 'react-redux';
+import GlobalModalContextProvider from 'components/layout/modal';
 import ThemeProvider from 'theme';
+import store from 'store';
+
 import 'styles/globals.css';
 
 const queryClient = new QueryClient({
@@ -11,15 +14,17 @@ const queryClient = new QueryClient({
 
 function CharmApp({ Component, pageProps }: AppProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <GlobalModalContextProvider>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </GlobalModalContextProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <StoreProvider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <GlobalModalContextProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </GlobalModalContextProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </StoreProvider>
   );
 }
 
