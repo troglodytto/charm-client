@@ -7,6 +7,7 @@ import {
   Switch,
   Badge,
   Avatar,
+  CircularProgress,
 } from '@mui/material';
 import Link from 'next/link';
 import { FC, MouseEventHandler, ReactNode, useState } from 'react';
@@ -25,8 +26,13 @@ import {
 } from 'react-icons/ri';
 import { MdOutlineNotificationsActive } from 'react-icons/md';
 import styled from 'styled-components';
-import { useModal } from 'hooks';
+import { useAppSelector, useAppDispatch } from 'app/hooks';
 import { WithChildren } from 'next-env';
+import {
+  loginAction,
+  logoutAction,
+  setOnlineStatusAction,
+} from 'app/store/feature/auth';
 
 const AppHeaderNav = styled.nav`
   background-color: ${props => props.theme.primary};
@@ -127,14 +133,74 @@ const DropdownMenu: FC<WithChildren & ButtonProps & DropdownProps> = ({
   );
 };
 
-const AppHeader: FC = () => {
-  const { open } = useModal();
-  const [online, setOnline] = useState(false);
+const AuthHeader: FC = () => {
+  const dispatch = useAppDispatch();
+  const { isAuthorized, isOnline, profileImage, userName, isLoading } =
+    useAppSelector(store => store.auth);
 
   const onLogin: MouseEventHandler = () => {
-    open(<h2>Hi</h2>);
+    dispatch(loginAction());
   };
 
+  if (isLoading) {
+    return <CircularProgress color="primary" size={24} />;
+  }
+
+  return isAuthorized ? (
+    <DropdownMenu
+      endIcon={<FiChevronDown />}
+      label={
+        <Avatar
+          src={profileImage}
+          sx={{ backgroundColor: '#83e1f0', height: 36, width: 36 }}>
+          {userName.charAt(0)}
+        </Avatar>
+      }>
+      <MenuButton
+        fullWidth
+        onClick={() => dispatch(setOnlineStatusAction(!isOnline))}
+        startIcon={<AiOutlineNotification />}>
+        Online Status
+        <Switch checked={isOnline} sx={{ marginLeft: 'auto' }} />
+      </MenuButton>
+      <MenuButton
+        fullWidth
+        startIcon={
+          <Badge
+            variant="dot"
+            color="primary"
+            anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+            <MdOutlineNotificationsActive />
+          </Badge>
+        }>
+        Notifications
+      </MenuButton>
+      <Link href="/">
+        <MenuButton fullWidth startIcon={<RiUser6Line />}>
+          Profile
+        </MenuButton>
+      </Link>
+      <Link href="/">
+        <MenuButton fullWidth startIcon={<FiSettings />}>
+          Settings
+        </MenuButton>
+      </Link>
+
+      <MenuButton
+        fullWidth
+        startIcon={<RiLogoutBoxRLine />}
+        onClick={() => dispatch(logoutAction())}>
+        Logout
+      </MenuButton>
+    </DropdownMenu>
+  ) : (
+    <IconButton color="primary" onClick={onLogin}>
+      <RiUser6Line color="#83e1f0" size={24} />
+    </IconButton>
+  );
+};
+
+const AppHeader: FC = () => {
   return (
     <AppHeaderNav>
       <Link href="/">
@@ -171,55 +237,7 @@ const AppHeader: FC = () => {
         startAdornment={<SearchIcon size={24} />}
       />
 
-      {true ? (
-        <IconButton color="primary" onClick={onLogin}>
-          <RiUser6Line color="#83e1f0" size={24} />
-        </IconButton>
-      ) : (
-        <DropdownMenu
-          endIcon={<FiChevronDown />}
-          label={
-            <Avatar sx={{ backgroundColor: '#83e1f0', height: 36, width: 36 }}>
-              V
-            </Avatar>
-          }>
-          <MenuButton
-            fullWidth
-            onClick={() => setOnline(!online)}
-            startIcon={<AiOutlineNotification />}>
-            Online Status
-            <Switch checked={online} sx={{ marginLeft: 'auto' }} />
-          </MenuButton>
-          <MenuButton
-            fullWidth
-            startIcon={
-              <Badge
-                variant="dot"
-                color="primary"
-                anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
-                <MdOutlineNotificationsActive />
-              </Badge>
-            }>
-            Notifications
-          </MenuButton>
-          <Link href="/">
-            <MenuButton fullWidth startIcon={<RiUser6Line />}>
-              Profile
-            </MenuButton>
-          </Link>
-          <Link href="/">
-            <MenuButton fullWidth startIcon={<FiSettings />}>
-              Settings
-            </MenuButton>
-          </Link>
-
-          <Link href="/">
-            <MenuButton fullWidth startIcon={<RiLogoutBoxRLine />}>
-              Logout
-            </MenuButton>
-          </Link>
-        </DropdownMenu>
-      )}
+      <AuthHeader />
     </AppHeaderNav>
   );
 };

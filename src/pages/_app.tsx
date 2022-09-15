@@ -1,9 +1,10 @@
-import Layout from 'components/layout';
-import GlobalModalContextProvider from 'components/layout/modal';
 import { AppProps } from 'next/app';
 import { MutationCache, QueryClient, QueryClientProvider } from 'react-query';
 import ThemeProvider from 'theme';
+import Layout from 'components/layout';
+import GlobalModalContextProvider from 'components/layout/modal';
 import 'styles/globals.css';
+import store from 'app/store';
 
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({}),
@@ -23,4 +24,4 @@ function CharmApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default CharmApp;
+export default store.withRedux(CharmApp);
