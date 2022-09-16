@@ -4,16 +4,17 @@ import { setCookie } from 'nookies';
 
 const login: NextApiHandler = async (req, res) => {
   const { idToken } = req.body;
-
   const { data } = await httpClient.post('auth/login', { id_token: idToken });
+
   const {
     access_token: accessToken,
     refresh_token: refreshToken,
+    max_age: maxAge,
     ...response
   } = data;
 
   setCookie({ res }, 'accessToken', accessToken, {
-    maxAge: 900,
+    maxAge,
     path: '/',
     httpOnly: true,
     secure: true,
@@ -21,7 +22,6 @@ const login: NextApiHandler = async (req, res) => {
   });
 
   setCookie({ res }, 'refreshToken', refreshToken, {
-    maxAge: 30000,
     path: '/',
     httpOnly: true,
     secure: true,
