@@ -32,7 +32,7 @@ import {
   loginAction,
   logoutAction,
   setOnlineStatusAction,
-} from 'app/store/feature/auth';
+} from 'app/store/feature/auth/auth.actions';
 
 const AppHeaderNav = styled.nav`
   background-color: ${props => props.theme.primary};

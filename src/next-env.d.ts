@@ -9,3 +9,12 @@ import { ReactNode } from 'react';
 interface WithChildren {
   children: ReactNode;
 }
+interface AuthState {
+  email: string;
+  userName: string;
+  profileImage: string;
+  isAuthorized: boolean;
+  isOnline: boolean;
+  isLoading: boolean;
+  token: string;
+}

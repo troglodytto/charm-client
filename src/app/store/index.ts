@@ -6,7 +6,7 @@ import {
   AnyAction,
 } from '@reduxjs/toolkit';
 import { HYDRATE, createWrapper } from 'next-redux-wrapper';
-import auth from 'app/store/feature/auth';
+import auth from './feature/auth/auth.slice';
 
 const rootReducer = combineReducers({ auth });
 
@@ -29,7 +29,9 @@ const store = configureStore({
   middleware: defaultMiddleware => defaultMiddleware(),
 });
 
-const createStore = () => store;
+export const createStore = () => {
+  return store;
+};
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

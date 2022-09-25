@@ -1,19 +1,11 @@
+import { createSlice, SliceCaseReducers } from '@reduxjs/toolkit';
+import { AuthState } from 'next-env';
 import {
-  createAsyncThunk,
-  createSlice,
-  SliceCaseReducers,
-} from '@reduxjs/toolkit';
-import { googleLogin } from 'app/services/firebase';
-import axios from 'axios';
-
-interface AuthState {
-  email: string;
-  userName: string;
-  profileImage: string;
-  isAuthorized: boolean;
-  isOnline: boolean;
-  isLoading: boolean;
-}
+  loginAction,
+  logoutAction,
+  refreshAction,
+  setOnlineStatusAction,
+} from './auth.actions';
 
 export const initializeAuthState = async (): Promise<AuthState> => {
   return {
@@ -23,6 +15,7 @@ export const initializeAuthState = async (): Promise<AuthState> => {
     email: '',
     userName: '',
     isLoading: false,
+    token: '',
   };
 };
 
@@ -33,29 +26,8 @@ const initialState: AuthState = {
   email: '',
   userName: '',
   isLoading: false,
+  token: '',
 };
-
-export const loginAction = createAsyncThunk<Partial<AuthState>>(
-  'AUTH/LOGIN',
-  async () => {
-    const data = await googleLogin();
-    return {
-      isOnline: data.is_active,
-      profileImage: data.profile_image,
-      email: data.email,
-      userName: data.user_name,
-    };
-  }
-);
-
-export const logoutAction = createAsyncThunk('AUTH/LOGOUT', async () => {
-  await axios.get('/api/auth/logout');
-});
-
-export const setOnlineStatusAction = createAsyncThunk<boolean, boolean>(
-  'AUTH/ONLINE_STATUS',
-  status => status
-);
 
 const authSlice = createSlice<AuthState, SliceCaseReducers<AuthState>>({
   name: 'AUTH',
@@ -73,6 +45,7 @@ const authSlice = createSlice<AuthState, SliceCaseReducers<AuthState>>({
       state.email = payload.email;
       state.userName = payload.userName;
       state.isLoading = false;
+      state.token = payload.token;
     });
 
     builder.addCase(loginAction.rejected, state => {
@@ -82,6 +55,11 @@ const authSlice = createSlice<AuthState, SliceCaseReducers<AuthState>>({
       state.profileImage = '';
       state.email = '';
       state.userName = '';
+      state.token = '';
+    });
+
+    builder.addCase(refreshAction, (state, { payload }) => {
+      state.token = payload;
     });
 
     builder.addCase(logoutAction.fulfilled, state => {
@@ -91,6 +69,7 @@ const authSlice = createSlice<AuthState, SliceCaseReducers<AuthState>>({
       state.profileImage = '';
       state.email = '';
       state.userName = '';
+      state.token = '';
     });
 
     builder.addCase(setOnlineStatusAction.fulfilled, (state, { payload }) => {
